@@ -1,7 +1,7 @@
 # tinySync
 
 **Airtable → Webflow sync via CLI**
-***Alpha Release: use at your own risk***
+***Alpha release: use at your own risk***
 
 
 - One-directional manual sync
