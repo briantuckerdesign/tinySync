@@ -12,6 +12,15 @@
 - No record limits*
   - <sub>*We are all beholden to the limits of Airtable/Webflow/APIs 🧘</sub>
 
+
+## Quick start:
+
+- Download the latest (release)[https://github.com/briantuckerdesign/tinySync/releases]
+- Make sure you have NPM installed
+- Unzip the folder and open it in a terminal window
+- Run `npm i`
+- Run `npm start`
+
 ---
 
 ## Requirements
@@ -74,6 +83,13 @@ Your passwords and API keys are stored, encrypted, on your computer and can only
 ## Usage
 
 Follow the prompts to set up your sync. If your sync utilizes linked records, you must have another sync set up for the linked table so that the linked records have Webflow IDs to utilize.
+
+### Airtable State Options
+
+- `Not synced` or blank: Will not be sent to Webflow. If `Delete records` is enabled, will also delete previously created items in Webflow
+- `Queued for sync`: On next sync, this record will be sent to Webflow and then State will change to `Staging`.
+- `Always sync`: This record will be synced on every run.
+- `Staging`: For records that are already published, but you don't want changes made to the record going live on next sync.
 
 ---
 
