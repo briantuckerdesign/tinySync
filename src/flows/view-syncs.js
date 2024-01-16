@@ -38,15 +38,15 @@ export async function viewSyncs(state) {
 
         choices.push(
             {
-                name: `${c.green("+")}${c.white(" Create new sync")}`,
+                name: `${c.green("+")} Create new sync`,
                 value: "createSync",
             },
             {
-                name: `${c.dim("← Back")}`,
+                name: `${c.dim("←")} Back`,
                 value: "back",
             },
             {
-                name: `${c.dim("✖ Exit")}`,
+                name: `${c.dim("✖")} Exit`,
                 value: "exit",
             }
         );

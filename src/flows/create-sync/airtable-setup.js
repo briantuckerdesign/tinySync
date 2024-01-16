@@ -46,7 +46,7 @@ export async function airtableSetup(state) {
             //airtableSettings.table.fields is an array of objects
             // add one to the beginning of the array with name of "Create for me"
             let createForMe = {
-                name: `${c.green("+")}${c.white(" Create for me")}`,
+                name: `${c.green("+")}" Create for me`,
                 tsCreateField: "createForMe",
             };
 

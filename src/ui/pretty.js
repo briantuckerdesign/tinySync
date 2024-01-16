@@ -85,9 +85,9 @@ async function delayLog(message, delay = 25) {
     console.log(message);
 }
 
-async function heading(message, color = "white") {
+async function heading(message, style = "reset") {
     console.log(
-        c[color](
+        c[style](
             figlet.textSync(message, {
                 font: "Rectangles",
                 horizontalLayout: "default",

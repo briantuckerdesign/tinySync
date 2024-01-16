@@ -23,9 +23,9 @@ export const mainMenu = async (state) => {
         await ui.pretty.spacer();
 
         const choices = [
-            { message: `${c.green("»")}${c.white(" View syncs")}`, name: "viewSyncs" },
-            { message: `${c.yellow("»")}${c.white(" Change password")}`, name: "changePassword" },
-            { message: `${c.dim("✖ Exit")}`, name: "exit" },
+            { message: `${c.green("»")} View syncs`, name: "viewSyncs" },
+            { message: `${c.yellow("»")} Change password`, name: "changePassword" },
+            { message: `${c.dim("✖")} Exit`, name: "exit" },
         ];
         const userChoice = await ui.input.select({
             name: "mainMenu",
