@@ -23,6 +23,9 @@ export async function viewSyncs(state) {
         await ui.pretty.dashedLine();
         await ui.pretty.spacer();
         const config = state.config;
+        if (!config.syncs) {
+            config = { syncs: [] };
+        }
         const syncs = config.syncs || [];
 
         // Formats syncs for select prompt
