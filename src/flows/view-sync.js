@@ -76,13 +76,13 @@ export async function viewSync(state, syncConfig) {
         const syncMessage = "What would you like to do?";
         const syncChoices = [
             {
-                message: `${c.green("»")}${c.white(" Sync")}`,
+                message: `${c.green("»")} Sync`,
                 name: "runSync",
             },
-            { message: `${c.cyan("↑")}${c.white(" Publish site")}`, name: "publishSite" },
-            { message: `${c.red("✖")}${c.white(" Delete sync")}`, name: "deleteSync" },
-            { message: `${c.dim("← Back")}`, name: "back" },
-            { message: `${c.dim("✖ Exit")}`, name: "exit" },
+            { message: `${c.cyan("↑")} Publish site`, name: "publishSite" },
+            { message: `${c.red("✖")} Delete sync`, name: "deleteSync" },
+            { message: `${c.dim("←")} Back`, name: "back" },
+            { message: `${c.dim("✖")} Exit`, name: "exit" },
         ];
 
         // Asks user what they want to do with the selected sync
