@@ -15,7 +15,7 @@
 
 ## Quick start:
 
-- Download the latest (release)[https://github.com/briantuckerdesign/tinySync/releases]
+- Download the latest [release](https://github.com/briantuckerdesign/tinySync/releases)
 - Make sure you have NPM installed
 - Unzip the folder and open it in a terminal window
 - Run `npm i`
@@ -95,7 +95,7 @@ Follow the prompts to set up your sync. If your sync utilizes linked records, yo
 
 ## Disclaimers
 
-I am a hobbyist developer. I have made best-effort attempts to make this software as secure and stable as possible, but I make no guarantees. Use at your own risk. For corporate users, I highly recommend amazing paid tools out there like [WhaleSync](https://whalesync.com/), [Flowmonk](https://flowmonk.com/), or [PowerImporter]([https://](https://www.powerimporter.com/)).
+I am a hobbyist developer. I have made best-effort attempts to make this software as secure and stable as possible, but I make no guarantees. Use at your own risk. For corporate users, I highly recommend amazing paid tools out there like [WhaleSync](https://whalesync.com/), [Flowmonk](https://flowmonk.com/), or [PowerImporter](https://https://www.powerimporter.com/).
 
 This is an early release. It works, but there may be errors. Please report any issues you find. I have a lot of ideas for features and improvements, but I'm a one-person team and I have a day job. If you'd like to contribute, please reach out!
 
