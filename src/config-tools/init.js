@@ -28,5 +28,5 @@ export async function initConfig(state) {
 
     await configTools.save(state);
 
-    return;
+    return defaultConfig;
 }
