@@ -23,6 +23,8 @@ import { configTools } from "./index.js";
 export async function saveConfig(state) {
     const password = state.password;
 
+    state.config.version = process.env.npm_package_version;
+
     const encryptedConfig = await configTools.secure.encrypt(JSON.stringify(state.config), password);
 
     fs.writeFileSync("./src/data/config.json", JSON.stringify(encryptedConfig, null, 2));
