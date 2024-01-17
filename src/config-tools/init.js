@@ -22,6 +22,7 @@ export async function initConfig(state) {
         airtableKeys: [],
         webflowKeys: [],
         settings: {},
+        initVersion: process.env.npm_package_version,
     };
 
     state.config = defaultConfig;
