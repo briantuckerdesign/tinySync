@@ -10,6 +10,8 @@
 import { ui } from "./ui/index.js";
 import { flows } from "./flows/index.js";
 import ora from "ora";
+import * as p from "@clack/prompts";
+import f from "picocolors";
 
 (async () => {
     let loader = ora({ spinner: "arc", color: "gray" });
@@ -17,16 +19,20 @@ import ora from "ora";
     let state = {
         config: null,
         password: null,
-        loader,
+        loader, // to be removed
+        p, // prompts/loader (via clack)
+        f, // format (via picocolors)
     };
-
-    await ui.pretty.spacer();
-    await ui.pretty.solidLine();
     await ui.pretty.heading("TinySync", "green");
     await ui.pretty.spacer();
     await ui.pretty.signature();
     await ui.pretty.spacer();
 
+    state.p.intro(state.f.dim(`tinySync v${process.env.npm_package_version}`)); // Fixed typo in variable name
+
     await flows.login(state);
+
     await flows.mainMenu(state);
+
+    state.p.outro(`See ya later! 👋`);
 })();

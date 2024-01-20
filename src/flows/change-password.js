@@ -13,43 +13,23 @@
  */
 
 import { configTools } from "../config-tools/index.js";
-import { ui } from "../ui/index.js";
 import { flows } from "./index.js";
 import { createPassword } from "./login.js";
 
 export async function changePassword(state) {
-    const confirmChange = await ui.input.toggle({
-        name: "confirmChange",
-        disabled: "No",
-        enabled: "Yes",
-        message: `Are you sure you want to change your password?`,
-    });
+    const confirmChange = await state.p.confirm({ message: "Are you sure you want to change your password?" });
 
-    if (confirmChange) {
-        state.password = await createPassword(state);
-        await configTools.save(state);
-
-        await ui.pretty.success();
-        await ui.pretty.log("Password changed!");
+    if (state.p.isCancel(confirmChange) || !confirmChange) {
+        state.p.log.message(state.f.yellow("Ok..."));
         await flows.mainMenu(state);
-    } else {
-        await ui.pretty.ok();
-        await flows.mainMenu(state);
+        return;
     }
 
-    if (newPassword !== newPasswordConfirm) {
-        await ui.pretty.error("Passwords do not match.");
-        await changePassword(state);
-    } else {
-        state.password = newPassword;
-        await ui.pretty.log("Changing password...");
-        await ui.pretty.spacer();
-        await ui.pretty.dashedLine();
-        await ui.pretty.spacer();
-        await ui.pretty.log("Password changed.");
-        await ui.pretty.spacer();
-        await ui.pretty.dashedLine();
-        await ui.pretty.spacer();
+    if (confirmChange) {
+        await createPassword(state);
+        state.p.log.success("Password changed!");
+        await configTools.save(state);
         await flows.mainMenu(state);
+        return;
     }
 }

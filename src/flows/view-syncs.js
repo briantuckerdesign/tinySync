@@ -13,15 +13,10 @@
  * 4. Execute selected option
  */
 
-import { ui } from "../ui/index.js";
 import { flows } from "./index.js";
-import c from "ansi-colors";
 
 export async function viewSyncs(state) {
     try {
-        await ui.pretty.spacer();
-        await ui.pretty.dashedLine();
-        await ui.pretty.spacer();
         const config = state.config;
         if (!config.syncs) {
             config = { syncs: [] };
@@ -31,35 +26,35 @@ export async function viewSyncs(state) {
         // Formats syncs for select prompt
         const choices = syncs.map((sync) => {
             return {
-                name: sync.name,
+                label: state.f.italic(sync.name),
                 value: sync,
             };
         });
 
         choices.push(
             {
-                name: `${c.green("+")} Create new sync`,
+                label: "Create new sync",
                 value: "createSync",
             },
             {
-                name: `${c.dim("←")} Back`,
+                label: "Back",
                 value: "back",
             },
             {
-                name: `${c.dim("✖")} Exit`,
+                label: "Exit",
                 value: "exit",
             }
         );
 
-        // Asks user which sync they want to view
-        async function selectSyncs(choices) {
-            const syncToView = await ui.selectAndReturn(choices, "Which sync would you like to view?", "syncToView");
-
-            return syncToView.value;
-        }
-
         // Returns the selected sync
-        let selectedSync = await selectSyncs(choices);
+        let selectedSync = await state.p.select({
+            message: state.f.bold("🔍 View syncs"),
+            options: choices,
+        });
+
+        if (state.p.isCancel(selectedSync)) {
+            await flows.mainMenu(state);
+        }
 
         switch (selectedSync) {
             case "back":

@@ -12,37 +12,30 @@
  * @param {object} state
  */
 
-import { ui } from "../ui/index.js";
 import { flows } from "./index.js";
-import c from "ansi-colors";
 
 export const mainMenu = async (state) => {
     try {
-        await ui.pretty.spacer();
-        await ui.pretty.dashedLine();
-        await ui.pretty.spacer();
-
-        const choices = [
-            { message: `${c.green("»")} View syncs`, name: "viewSyncs" },
-            { message: `${c.yellow("»")} Change password`, name: "changePassword" },
-            { message: `${c.dim("✖")} Exit`, name: "exit" },
-        ];
-        const userChoice = await ui.input.select({
-            name: "mainMenu",
-            message: " ",
-            choices: choices,
+        state.p.log.info(state.f.bold("🏠 Menu"));
+        const menu = await state.p.select({
+            message: "What would you like to do?",
+            options: [
+                { value: "viewSyncs", label: "View syncs" },
+                { value: "changePassword", label: "Change password" },
+                { value: "exit", label: "Exit", hint: "Bye!" },
+            ],
         });
 
-        switch (userChoice) {
+        switch (menu) {
             case "viewSyncs":
                 await flows.viewSyncs(state);
                 break;
             case "changePassword":
                 await flows.changePassword(state);
                 break;
-            case "exit":
-                await ui.pretty.log("Exiting...");
-                process.exit();
+            default:
+                state.p.outro("See ya later! 👋");
+                process.exit(0);
         }
     } catch (error) {
         throw error;

@@ -25,30 +25,39 @@ export async function createSync(state) {
         let config = state.config;
         let settings, syncSettings;
 
-        await ui.pretty.spacer();
-        await ui.pretty.logHeading("You will need a few things to get started:");
-        await ui.pretty.log("- A couple minutes of your time");
-        await ui.pretty.log("- An Airtable table with some ");
-        await ui.pretty.log("  matching fields in a Webflow collection");
-        await ui.pretty.log("- Airtable API token");
-        await ui.pretty.log("- Webflow API key");
-        await ui.pretty.log("- Airtable fields for:");
-        await ui.pretty.log("  - Name");
-        await ui.pretty.log("  - Slug");
-        await ui.pretty.log("  - State");
-        await ui.pretty.log("  - Webflow Item ID");
-        await ui.pretty.log("  - Last Published");
-        await ui.pretty.log("Read more about these required fields on Github.");
-        await ui.pretty.spacer();
+        state.p.log.info(state.f.bold("🔨 Create sync"));
+        state.p.note(`You will need a few things to get started:
 
-        const shallWeContinue = await ui.input.toggle({
-            name: "requirements",
-            disabled: "Uhhh nevermind.",
-            enabled: "Yes!",
-            message: "Got it?",
-        });
-        if (shallWeContinue === false) {
+    - Airtable API token
+    - Webflow API key
+
+    - Airtable fields (tinySync can create these for you)
+        - Name 
+        - Slug
+        - State
+        - Webflow item ID
+        - Last published
+
+Read more about these required fields on Github.`);
+        // state.p.log.message("You will need a few things to get started:");
+        // state.p.log.message("- Airtable API token");
+        // state.p.log.message("- Webflow API key");
+        // state.p.log.message("- Airtable fields for:");
+        // state.p.log.message("  Name, slug, state, item ID, and last published.");
+        // state.p.log.message("Read more about these required fields on Github.");
+        // state.p.log.message("");
+
+        const shallWeContinue = await state.p.confirm({ message: "Got it?" });
+
+        // const shallWeContinue = await ui.input.toggle({
+        //     name: "requirements",
+        //     disabled: "Uhhh nevermind.",
+        //     enabled: "Yes!",
+        //     message: "Got it?",
+        // });
+        if (shallWeContinue === false || state.p.isCancel(shallWeContinue)) {
             await flows.viewSyncs(state);
+            return;
         }
 
         let airtableSettings = await airtableSetup(state);
@@ -164,3 +173,26 @@ export async function createSync(state) {
         throw error;
     }
 }
+// const group = await p.group(
+//     {
+//       name: () => p.text({ message: 'What is your name?' }),
+//       age: () => p.text({ message: 'What is your age?' }),
+//       color: ({ results }) =>
+//         p.multiselect({
+//           message: `What is your favorite color ${results.name}?`,
+//           options: [
+//             { value: 'red', label: 'Red' },
+//             { value: 'green', label: 'Green' },
+//             { value: 'blue', label: 'Blue' },
+//           ],
+//         }),
+//     },
+//     {
+//       // On Cancel callback that wraps the group
+//       // So if the user cancels one of the prompts in the group this function will be called
+//       onCancel: ({ results }) => {
+//         p.cancel('Operation cancelled.');
+//         process.exit(0);
+//       },
+//     }
+//   );

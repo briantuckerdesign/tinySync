@@ -2,9 +2,7 @@
 /*                                Flows / Login                               */
 /* -------------------------------------------------------------------------- */
 
-import { ui } from "../ui/index.js";
 import { configTools } from "../config-tools/index.js";
-
 /**
  * Either prompts the user to log in, or to create a password.
  *
@@ -15,17 +13,19 @@ import { configTools } from "../config-tools/index.js";
  * @returns {Promise<void>} - A promise that resolves when the login process is complete.
  */
 export async function login(state) {
+    state.p.log.info(state.f.bold("🔐 Login"));
     try {
         state.config = await configTools.load();
 
         if (!state.config.encryptedData) {
-            await ui.pretty.log("Create a password to continue");
-            state.password = await createPassword();
+            await createPassword(state);
             state.config = await configTools.init(state);
         } else {
             await inputPassword(state);
         }
+        state.p.log.success(state.f.green("Success!"));
     } catch (error) {
+        console.log(error);
         console.log("There was an error logging in.");
         process.exit(1);
     }
@@ -39,26 +39,26 @@ export async function login(state) {
  * @throws {Error} - If an error occurs during the execution of the function.
  */
 async function inputPassword(state, repeat = false) {
+    let message = "Incorrect password. Try again.";
     if (!repeat) {
-        await ui.pretty.log("Enter your password to continue.");
-        await ui.pretty.spacer();
-        // Only shown on first attempt
+        message = "Enter your password:";
     }
 
-    // Ask for password
-    const password = await ui.input.prompt({
-        name: "password",
-        type: "password",
-        message: "Enter your password:",
+    const password = await state.p.password({
+        message: message,
     });
+
+    if (state.p.isCancel(password)) {
+        state.p.cancel("Ok then...");
+        process.exit(0);
+    }
 
     try {
         // try to drypt using password
-        state.config = configTools.secure.decrypt(state.config, password.password);
-        state.password = password.password;
+        state.config = configTools.secure.decrypt(state.config, password);
+        state.password = password;
     } catch (error) {
         // if password is incorrect, prompt user again
-        await ui.pretty.log("Incorrect password. Try again.");
         await inputPassword(state, true);
     }
     return;
@@ -69,25 +69,28 @@ async function inputPassword(state, repeat = false) {
  * If the passwords don't match, prompts the user again.
  * @returns {Promise<string>} The password entered by the user.
  */
-export async function createPassword() {
-    // Ask for password
-    const password = await ui.input.prompt({
-        name: "password",
-        type: "password",
-        message: "Enter a password:",
-    });
-    // Ask for password again to confirm
-    const confirmPassword = await ui.input.prompt({
-        name: "confirmPassword",
-        type: "password",
-        message: "Confirm password:",
-    });
+export async function createPassword(state, isRepeat = false) {
+    let message = "Create a password:";
+    if (isRepeat) message = "Passwords don't match. Try again.";
+
+    let password = await state.p.password({ message: message });
+    if (state.p.isCancel(password)) {
+        state.p.cancel("Ok then...");
+        process.exit(0);
+    }
+    message = "Confirm password:";
+    let confirmPassword = await state.p.password({ message: message });
+
+    if (state.p.isCancel(confirmPassword)) {
+        state.p.cancel("Ok then...");
+        process.exit(0);
+    }
     // If passwords don't match, prompt user again
-    if (password.password !== confirmPassword.confirmPassword) {
-        await ui.pretty.log("Passwords don't match. Try again.");
-        await createPassword();
+    if (password !== confirmPassword) {
+        await createPassword(state, true);
     } else {
-        // If passwords match, return password
-        return password.password;
+        // If passwords match, set password in state
+        state.password = password;
+        return;
     }
 }
