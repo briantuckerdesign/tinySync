@@ -22,6 +22,7 @@ import f from "picocolors";
         loader, // to be removed
         p, // prompts/loader (via clack)
         f, // format (via picocolors)
+        s: p.spinner(),
     };
     await ui.pretty.heading("TinySync", "green");
     await ui.pretty.spacer();

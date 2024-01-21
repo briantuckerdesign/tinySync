@@ -5,7 +5,7 @@ import { webflow } from "../webflow/index.js";
 import { airtable } from "../airtable/index.js";
 import { utils } from "../utils/index.js";
 
-export async function publishItems(records, syncConfig, loader, state) {
+export async function publishItems(records, syncConfig, state) {
     try {
         const recordsToPublish = records.toPublish;
         if (recordsToPublish.length === 0) {
@@ -25,27 +25,21 @@ export async function publishItems(records, syncConfig, loader, state) {
             return;
         }
 
+        state.s.start("Publishing items...");
+
         // Publish items to Webflow
-        loader.text = "Publishing Webflow items...";
-        loader.color = "blue";
         const response = await webflow.publishItems(syncConfig, ids);
 
         if (response.errors) {
             // If validation error occurred, republish site (if enabled)
             const validationError = response.errors.find((error) => error.includes("ValidationError"));
             if (validationError && syncConfig.autoPublish) {
-                loader.color = "orange";
-                loader.text = "Validation error occurred. Republishing site...";
-                loader.stopAndPersist({ symbol: "✖" });
-                loader.color = "gray";
-                loader.start("Syncing...");
+                state.s.stop(`❌ ${state.f.dim("Validation error occurred. Republishing site...")}`);
+                state.s.start("Publishing site...");
                 await webflow.publishSite(syncConfig);
+                state.s.stop(`✅ ${state.f.dim("Site published.")}`);
             } else if (validationError) {
-                loader.color = "red";
-                loader.text = "Validation error occurred. Republish site to fix.";
-                loader.stopAndPersist({ symbol: "✖" });
-                loader.color = "gray";
-                loader.start("Syncing...");
+                state.s.stop(`🪲 ${state.f.dim("Validation error occurred.  Republish site to fix.")}`);
             }
         }
 
@@ -57,19 +51,18 @@ export async function publishItems(records, syncConfig, loader, state) {
 
             recordUpdates = { fields: recordUpdates };
 
-            loader.text = "Updating Airtable record...";
-            loader.color = "yellow";
+            state.s.start("Updating records in Airtable...");
             await airtable.updateRecord(recordUpdates, record.id, syncConfig);
+            state.s.stop(`✅ ${state.f.dim("Records updated.")}`);
         }
 
         return response.data;
     } catch (error) {
-        loader.warn("Error publishing items");
+        state.p.log.error("Error publishing items");
         if (error.response.status === 404) {
-            loader.warn("Try repubishing your site! Item not found to publish.");
+            state.p.log.error("Try repubishing your site! Item not found to publish.");
             return;
         }
-        console.log("Error publishing items: ");
         throw error;
     }
 }

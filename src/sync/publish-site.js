@@ -25,26 +25,25 @@ export async function publishWebflowSite(state, syncConfig) {
             };
         }
 
-        const response = await axios.post(
-            `https://api.webflow.com/v2/sites/${syncConfig.webflow.site.id}/publish`,
-            body,
-            {
-                headers: {
-                    accept: "application/json",
-                    authorization: `Bearer ${syncConfig.webflow.apiKey}`,
-                },
-            }
-        );
-        if (!response) throw new Error(`Failed to publish site ${syncConfig.webflow.site.name}`);
+        state.s.start("Publishing site...");
+        const response = await axios.post(`https://api.webflow.com/v2/sites/${syncConfig.webflow.site.id}/publish`, body, {
+            headers: {
+                accept: "application/json",
+                authorization: `Bearer ${syncConfig.webflow.apiKey}`,
+            },
+        });
+        if (!response) {
+            state.s.stop(`❌ ${state.f.dim("Failed to publish site.")}`);
+            throw new Error(`Failed to publish site ${syncConfig.webflow.site.name}`);
+        }
         if (response.status === 202) {
-            await ui.pretty.success();
-            await ui.pretty.log("Site published successfully!");
+            state.s.stop(`✅ ${state.f.dim("Site published.")}`);
             await flows.viewSync(state, syncConfig);
         }
         return;
     } catch (error) {
         if (error.response && error.response.status === 429) {
-            console.log("Try republishing in a minute or two. You've hit the Webflow API rate limit.");
+            state.s.stop(`❌ ${state.f.dim("Try republishing in a minute or two. You've hit the Webflow API rate limit.")}`);
         } else {
             throw error;
         }

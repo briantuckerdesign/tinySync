@@ -6,11 +6,11 @@
  * Best of luck to anyone who has gotten this far. I'm sorry. Good luck.
  *
  */
-import { ui } from "../../../ui/index.js";
 import { getCompatibleAirtableFields } from "./get-compatible-airtable-fields.js";
 import { buildFieldMapping } from "./build-field-mapping.js";
-import c from "ansi-colors";
 import { storeExcludedFields } from "./store-excluded-fields.js";
+import { utils } from "../../../utils/index.js";
+import { flows } from "../../index.js";
 
 /**
  * Match Airtable fields to corresponding Webflow fields based on configuration
@@ -19,7 +19,7 @@ import { storeExcludedFields } from "./store-excluded-fields.js";
  * @param {Object} config - Configuration object containing Airtable and Webflow field information.
  * @returns {Array} - Array of matched field mappings between Airtable and Webflow.
  */
-export async function matchFields(airtableSettings, webflowSettings) {
+export async function matchFields(airtableSettings, webflowSettings, state) {
     try {
         let fields = [];
 
@@ -38,7 +38,7 @@ export async function matchFields(airtableSettings, webflowSettings) {
         fields.push(...specialFields);
 
         // Match the remaining fields
-        const matchedFields = await userMatchesFields(airtableFields, webflowFields);
+        const matchedFields = await userMatchesFields(airtableFields, webflowFields, state);
         fields.push(...matchedFields);
 
         return fields.filter((field) => field !== null);
@@ -47,7 +47,7 @@ export async function matchFields(airtableSettings, webflowSettings) {
     }
 }
 
-async function userMatchesFields(airtableFields, webflowFields) {
+async function userMatchesFields(airtableFields, webflowFields, state) {
     const fields = [];
 
     for (const webflowField of webflowFields) {
@@ -58,7 +58,7 @@ async function userMatchesFields(airtableFields, webflowFields) {
         if (compatibleAirtableFields.length === 0) continue;
 
         // User selects the Airtable field to match
-        const matchedAirtableField = await matchField(webflowField, compatibleAirtableFields);
+        const matchedAirtableField = await matchField(webflowField, compatibleAirtableFields, state);
 
         if (matchedAirtableField === null) continue;
 
@@ -79,20 +79,34 @@ async function userMatchesFields(airtableFields, webflowFields) {
  * @param {array} airtableFields - The list of Airtable fields to choose from.
  * @returns {object} - The matched Airtable field.
  */
-async function matchField(webflowField, airtableFields) {
+async function matchField(webflowField, airtableFields, state) {
     if (!webflowField.isEditable) return null;
 
     if (!webflowField.isRequired) {
+        // Can't skip required fields
         const skipOption = {
-            name: "skip",
+            name: "Skip",
             message: "Skip...",
         };
         airtableFields.unshift(skipOption);
     }
 
-    const message = `${c.blue.bold("Webflow")} Field "${webflowField.displayName}" maps to...\n${c.yellow.bold("Airtable")} field:`;
-    const matchedField = await ui.selectAndReturn(airtableFields, message, "matchedField");
-    if (matchedField.name === "skip") return null;
+    state.p.log.message(state.f.italic(`Webflow field: ${webflowField.displayName} matches to:`));
+
+    const message = `${state.f.bold("Airtable")} field:`;
+
+    let fieldsToSelect = utils.encapsulateObjectForSelect(airtableFields);
+
+    const matchedField = await state.p.select({
+        message: message,
+        options: fieldsToSelect,
+    });
+
+    if (state.p.isCancel(matchedField)) {
+        await flows.viewSyncs(state);
+    }
+
+    if (matchedField.name === "Skip") return null;
     return matchedField;
 }
 

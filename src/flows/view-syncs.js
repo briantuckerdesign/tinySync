@@ -61,13 +61,14 @@ export async function viewSyncs(state) {
                 await flows.mainMenu(state);
                 break;
             case "exit":
+                state.p.outro("See ya later! 👋");
                 process.exit();
             case "createSync":
                 await flows.createSync(state);
                 await flows.viewSyncs(state);
                 break;
             default:
-                await flows.viewSync(state, selectedSync);
+                await flows.viewSync(state, selectedSync, true);
                 break;
         }
     } catch (error) {

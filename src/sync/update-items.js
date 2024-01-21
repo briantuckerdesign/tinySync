@@ -5,10 +5,12 @@ import { utils } from "../utils/index.js";
 import { webflow } from "../webflow/index.js";
 import { airtable } from "../airtable/index.js";
 
-export async function updateItems(records, syncConfig, loader, state) {
+export async function updateItems(records, syncConfig, state) {
     if (records.toUpdate.length === 0) {
         return;
     }
+
+    state.s.start("Updating items...");
     for (const record of records.toUpdate) {
         // Parse data from Airtable to Webflow format
         let parsedData = await utils.parseRecordData(record, syncConfig, state);
@@ -17,21 +19,18 @@ export async function updateItems(records, syncConfig, loader, state) {
         const itemIdField = syncConfig.fields.find((field) => field.specialField === "itemId");
 
         // Create item in Webflow
-        loader.text = "Updating Webflow item...";
-        loader.color = "blue";
         const response = await webflow.updateItem(parsedData, syncConfig, record.fields[itemIdField.airtableName]);
 
         // Update Airtable record with Webflow response
-        loader.text = "Updating Airtable record...";
-        loader.color = "yellow";
-        await updateAirtableRecord(record, response, syncConfig, loader);
+        await updateAirtableRecord(record, response, syncConfig);
 
         // Add to publishing queue
         records.toPublish.push(record);
     }
+    state.s.stop(`✅ ${state.f.dim("Items updated.")}`);
 }
-// TODO: Ask ChatGPT about the three version of this function to see how to combine them
-async function updateAirtableRecord(record, response, syncConfig, loader) {
+
+async function updateAirtableRecord(record, response, syncConfig) {
     try {
         // Get value of slug field from Webflow response
         const webflowSlug = response.fieldData.slug;
@@ -77,7 +76,6 @@ async function updateAirtableRecord(record, response, syncConfig, loader) {
 
         await airtable.updateRecord(recordUpdates, record.id, syncConfig);
     } catch (error) {
-        console.log("Error updating Airtable record");
         throw error;
     }
 }

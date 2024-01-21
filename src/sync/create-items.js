@@ -5,28 +5,27 @@ import { utils } from "../utils/index.js";
 import { webflow } from "../webflow/index.js";
 import { airtable } from "../airtable/index.js";
 
-export async function createItems(records, syncConfig, loader = { text: "", color: "" }, state) {
+export async function createItems(records, syncConfig, state) {
     records.toUpdateInAirtable = [];
     if (records.toCreate.length === 0) {
         return;
     }
+    state.s.start("Creating items...");
     for (const record of records.toCreate) {
         // Parse data from Airtable to Webflow format
         let parsedData = await utils.parseRecordData(record, syncConfig, state);
 
         // Create item in Webflow
-        loader.text = "Creating Webflow item...";
-        loader.color = "blue";
+
         const response = await webflow.createItem(parsedData, syncConfig, state);
 
         // Update Airtable record with Webflow response
-        loader.text = "Updating Airtable record...";
-        loader.color = "yellow";
         await updateAirtableRecord(record, response, syncConfig, state);
 
         // Add to publishing queue
         records.toPublish.push(record);
     }
+    state.s.stop(`✅ ${state.f.dim("Items created.")}`);
 }
 
 async function updateAirtableRecord(record, response, syncConfig, state) {

@@ -38,6 +38,7 @@ export const mainMenu = async (state) => {
                 process.exit(0);
         }
     } catch (error) {
+        console.log(error);
         throw error;
     }
 };

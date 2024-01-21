@@ -12,7 +12,6 @@
  * 6. Save updated config
  *
  */
-import { ui } from "../../ui/index.js";
 import { v4 as uuidv4 } from "uuid";
 import { configTools } from "../../config-tools/index.js";
 import { flows } from "../index.js";
@@ -39,22 +38,9 @@ export async function createSync(state) {
         - Last published
 
 Read more about these required fields on Github.`);
-        // state.p.log.message("You will need a few things to get started:");
-        // state.p.log.message("- Airtable API token");
-        // state.p.log.message("- Webflow API key");
-        // state.p.log.message("- Airtable fields for:");
-        // state.p.log.message("  Name, slug, state, item ID, and last published.");
-        // state.p.log.message("Read more about these required fields on Github.");
-        // state.p.log.message("");
 
         const shallWeContinue = await state.p.confirm({ message: "Got it?" });
 
-        // const shallWeContinue = await ui.input.toggle({
-        //     name: "requirements",
-        //     disabled: "Uhhh nevermind.",
-        //     enabled: "Yes!",
-        //     message: "Got it?",
-        // });
         if (shallWeContinue === false || state.p.isCancel(shallWeContinue)) {
             await flows.viewSyncs(state);
             return;
@@ -63,13 +49,10 @@ Read more about these required fields on Github.`);
         let airtableSettings = await airtableSetup(state);
         let webflowSettings = await webflowSetup(state);
 
-        await ui.pretty.dashedLine();
-        await ui.pretty.spacer();
-        await ui.pretty.logHeading("Field Matching");
-        await ui.pretty.log("Hopefully it's not too confusing...");
-        await ui.pretty.spacer();
+        state.p.log.info(state.f.bold("Field matching"));
+        state.p.log.message("Hopefully it's not too confusing...");
 
-        let fields = await matchFields(airtableSettings, webflowSettings);
+        let fields = await matchFields(airtableSettings, webflowSettings, state);
 
         /**
          * Settings
@@ -86,30 +69,21 @@ Read more about these required fields on Github.`);
          *    What you see in Airtable is what you get in Webflow.
          */
 
-        await ui.pretty.dashedLine();
-        await ui.pretty.spacer();
-        await ui.pretty.logHeading("Settings");
-        await ui.pretty.log("Okay a couple final details...");
-        await ui.pretty.spacer();
+        state.p.log.info(state.f.bold("Settings"));
 
-        // Ask user for additional settings
-        settings = await ui.input.prompt([
+        settings = await state.p.group(
             {
-                type: "input",
-                name: "syncName",
-                message: "What would you like to name this sync?",
+                syncName: () => state.p.text({ message: "What would you like to name this sync?" }),
+                autoPublish: () => state.p.confirm({ message: "Automatically publish site if validation error occurs?" }),
+                deleteRecords: () => state.p.confirm({ message: "Delete records from Webflow if they are deleted in Airtable?" }),
             },
             {
-                type: "toggle",
-                name: "autoPublish",
-                message: "Automatically publish site if validation error occurs?",
-            },
-            {
-                type: "toggle",
-                name: "deleteRecords",
-                message: "Delete records from Webflow if they are deleted in Airtable?",
-            },
-        ]);
+                onCancel: async ({ results }) => {
+                    await flows.viewSyncs(state);
+                    return;
+                },
+            }
+        );
 
         /**
          * Sync object output
@@ -166,33 +140,10 @@ Read more about these required fields on Github.`);
         state.config = config;
         await configTools.save(state);
 
-        await ui.pretty.success();
-        await ui.pretty.logBold("Sync added successfully!");
+        state.p.log.success("✅ Sync added successfully!");
+        state.p.log.message("");
     } catch (error) {
-        console.log("Error creating sync.");
+        state.p.log.error("There was an error creating the sync.");
         throw error;
     }
 }
-// const group = await p.group(
-//     {
-//       name: () => p.text({ message: 'What is your name?' }),
-//       age: () => p.text({ message: 'What is your age?' }),
-//       color: ({ results }) =>
-//         p.multiselect({
-//           message: `What is your favorite color ${results.name}?`,
-//           options: [
-//             { value: 'red', label: 'Red' },
-//             { value: 'green', label: 'Green' },
-//             { value: 'blue', label: 'Blue' },
-//           ],
-//         }),
-//     },
-//     {
-//       // On Cancel callback that wraps the group
-//       // So if the user cancels one of the prompts in the group this function will be called
-//       onCancel: ({ results }) => {
-//         p.cancel('Operation cancelled.');
-//         process.exit(0);
-//       },
-//     }
-//   );

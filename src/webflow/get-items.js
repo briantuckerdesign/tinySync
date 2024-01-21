@@ -13,10 +13,8 @@
 
 import axios from "axios";
 
-export async function getItems(syncConfig, loader = { text: "", color: "", fail: () => {} }) {
+export async function getItems(syncConfig) {
     try {
-        loader.text = "Getting Webflow items...";
-        loader.color = "blue";
         const collectionId = syncConfig.webflow.collection.id;
         const apiKey = syncConfig.webflow.apiKey;
         let allItems = [];

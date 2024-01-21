@@ -1,4 +1,3 @@
-import { utils } from "./index.js";
 import { airtable } from "../airtable/index.js";
 import { webflow } from "../webflow/index.js";
 import { configTools } from "../config-tools/index.js";
@@ -9,21 +8,21 @@ import { fieldCompatibilityMap } from "../flows/create-sync/match-fields/get-com
  * @param {object} syncConfig - The configuration object.
  * @returns {object} - The updated configuration object.
  */
-export async function checkIfSchemaIsCurrent(syncConfig, loader, state) {
+export async function checkIfSchemaIsCurrent(syncConfig, state) {
+    // Saves updated schema to config.newSchema
     try {
-        // Saves updated schema to config.newSchema
-        loader.text = "Checking Airtable schema...";
-        loader.color = "yellow";
+        state.s.start("Getting Airtable schema...");
         await airtable.getSchema(syncConfig);
-        loader.text = "Checking Webflow schema...";
-        loader.color = "blue";
-        await webflow.getSchema(syncConfig);
+        state.s.stop(`✅ ${state.f.dim("Airtable schema retrieved.")}`);
 
-        loader.text = "Comparing schemas...";
-        loader.color = "gray";
+        state.s.start("Getting Webflow schema...");
+        await webflow.getSchema(syncConfig);
+        state.s.stop(`✅ ${state.f.dim("Webflow schema retrieved.")}`);
+
         // Compare the new schema to the existing schema
         await checkIfSchemaIsCurrentHelper(syncConfig, "airtable");
         await checkIfSchemaIsCurrentHelper(syncConfig, "webflow");
+        state.p.log.message(`✅ ${state.f.dim("Schema is current.")}`);
 
         {
             const config = state.config;
@@ -52,11 +51,7 @@ async function checkIfSchemaIsCurrentHelper(syncConfig, platform) {
     try {
         for (let field of syncConfig.fields) {
             // Skip special fields
-            if (
-                field.specialField === "lastPublished" ||
-                field.specialField === "itemId" ||
-                field.specialField === "state"
-            ) {
+            if (field.specialField === "lastPublished" || field.specialField === "itemId" || field.specialField === "state") {
                 continue;
             }
             let newField = syncConfig[platform].newSchema.fields.find((f) => f.id === field[`${platform}Id`]);
@@ -116,9 +111,7 @@ function updateFieldIfChanged(field, newField, platform, property) {
  */
 function checkFieldType(newField, existingField) {
     if (fieldCompatibilityMap[newField.type].includes(existingField.webflowType)) {
-        throw new Error(
-            `Airtable field "${existingField.airtableName}" has changed type from "${existingField.airtableType}" to "${newField.type}". This is not supported. Please re-run config.`
-        );
+        throw new Error(`Airtable field "${existingField.airtableName}" has changed type from "${existingField.airtableType}" to "${newField.type}". This is not supported. Please re-run config.`);
     } else {
         // console.log(
         //     `Airtable field "${existingField.airtableName}" has changed type from" ${existingField.airtableType}" to "${newField.type}".`
