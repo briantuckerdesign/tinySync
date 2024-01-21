@@ -25,7 +25,6 @@ export async function login(state) {
         }
         state.p.log.success(state.f.green("Success!"));
     } catch (error) {
-        console.log(error);
         console.log("There was an error logging in.");
         process.exit(1);
     }

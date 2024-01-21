@@ -24,10 +24,10 @@ import { utils } from "./utils/index.js";
     try {
         await utils.welcomeMessage(state);
     } catch (error) {
-        console.log(error);
+        console.log("There was an error running tinySync.");
     }
 
-    state.p.intro(state.f.dim(`tinySync v${process.env.npm_package_version}`)); // Fixed typo in variable name
+    state.p.intro(state.f.dim(`tinySync v${process.env.npm_package_version}`));
 
     await flows.login(state);
 
