@@ -32,7 +32,7 @@ export async function getSites(syncConfig, state) {
 
         return sites;
     } catch (error) {
-        console.log("Error getting sites.");
+        return null;
         throw error;
     }
 }

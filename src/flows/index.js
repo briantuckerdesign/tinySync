@@ -13,8 +13,10 @@ import { viewSync } from "./view-sync.js";
 import { viewSyncs } from "./view-syncs.js";
 import { createSync } from "./create-sync/index.js";
 import { changePassword } from "./change-password.js";
+import { manageKeys } from "./manage-keys.js";
 
 export const flows = {
+    manageKeys,
     login,
     mainMenu,
     viewSyncs,

@@ -8,17 +8,17 @@
  * 4. If successful, begin main menu flow
  */
 import { flows } from "./flows/index.js";
+import { utils } from "./utils/index.js";
 import * as p from "@clack/prompts";
 import f from "picocolors";
-import { utils } from "./utils/index.js";
 
 (async () => {
     let state = {
         config: null,
         password: null,
-        p, // prompts (via clack)
-        f, // format (via picocolors)
-        s: p.spinner(), // spinner (via clack)
+        p, // p for prompts (via clack)
+        f, // f for format (via picocolors)
+        s: p.spinner(), // s for spinner (via clack)
     };
 
     try {
