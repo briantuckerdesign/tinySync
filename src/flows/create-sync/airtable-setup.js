@@ -16,7 +16,6 @@
  *
  */
 
-import { ui } from "../../ui/index.js";
 import { airtable } from "../../airtable/index.js";
 import { flows } from "../index.js";
 import { utils } from "../../utils/index.js";
@@ -171,12 +170,6 @@ async function getApiTokenAndReturnBases(state) {
     try {
         const airtableSettings = {};
 
-        // Ask user for API token
-        // let apiToken = await ui.input.prompt({
-        //     name: "airtableApiToken",
-        //     type: "password",
-        //     message: "Airtable API token:",
-        // });
         let apiToken = await state.p.password({
             message: "Airtable API token:",
         });

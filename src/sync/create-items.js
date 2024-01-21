@@ -25,7 +25,7 @@ export async function createItems(records, syncConfig, state) {
         // Add to publishing queue
         records.toPublish.push(record);
     }
-    state.s.stop(`✅ ${state.f.dim("Items created.")}`);
+    state.s.stop(`✅ ${state.f.dim("Webflow items created.")}`);
 }
 
 async function updateAirtableRecord(record, response, syncConfig, state) {

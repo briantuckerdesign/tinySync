@@ -43,7 +43,7 @@ export async function publishItems(records, syncConfig, state) {
             }
         }
 
-        state.s.stop(`✅ ${state.f.dim("Items published.")}`);
+        state.s.stop(`✅ ${state.f.dim("Webflow items published.")}`);
 
         state.s.start("Updating records in Airtable...");
         // Update lastPublished field in Airtable
@@ -56,7 +56,7 @@ export async function publishItems(records, syncConfig, state) {
 
             await airtable.updateRecord(recordUpdates, record.id, syncConfig);
         }
-        state.s.stop(`✅ ${state.f.dim("Records updated.")}`);
+        state.s.stop(`✅ ${state.f.dim("Airtable records updated.")}`);
 
         return response.data;
     } catch (error) {

@@ -27,7 +27,7 @@ export async function updateItems(records, syncConfig, state) {
         // Add to publishing queue
         records.toPublish.push(record);
     }
-    state.s.stop(`✅ ${state.f.dim("Items updated.")}`);
+    state.s.stop(`✅ ${state.f.dim("Webflow items updated.")}`);
 }
 
 async function updateAirtableRecord(record, response, syncConfig) {

@@ -2,7 +2,6 @@
 /*                             Sync / Publish site                            */
 /* -------------------------------------------------------------------------- */
 import axios from "axios";
-import { ui } from "../ui/index.js";
 import { flows } from "../flows/index.js";
 
 export async function publishWebflowSite(state, syncConfig) {

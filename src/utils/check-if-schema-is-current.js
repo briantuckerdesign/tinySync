@@ -11,19 +11,13 @@ import { fieldCompatibilityMap } from "../flows/create-sync/match-fields/get-com
 export async function checkIfSchemaIsCurrent(syncConfig, state) {
     // Saves updated schema to config.newSchema
     try {
-        state.s.start("Getting Airtable schema...");
         await airtable.getSchema(syncConfig);
-        state.s.stop(`✅ ${state.f.dim("Airtable schema retrieved.")}`);
 
-        state.s.start("Getting Webflow schema...");
         await webflow.getSchema(syncConfig);
-        state.s.stop(`✅ ${state.f.dim("Webflow schema retrieved.")}`);
 
         // Compare the new schema to the existing schema
-        state.s.start("Comparing schemas...");
         await checkIfSchemaIsCurrentHelper(syncConfig, "airtable");
         await checkIfSchemaIsCurrentHelper(syncConfig, "webflow");
-        state.s.stop(`✅ ${state.f.dim("Schemas are current.")}`);
 
         {
             const config = state.config;

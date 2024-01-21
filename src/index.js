@@ -7,7 +7,6 @@
  * 3. Attempt login flow
  * 4. If successful, begin main menu flow
  */
-import { ui } from "./ui/index.js";
 import { flows } from "./flows/index.js";
 import * as p from "@clack/prompts";
 import f from "picocolors";
@@ -23,7 +22,7 @@ import { utils } from "./utils/index.js";
     };
 
     try {
-        utils.welcomeMessage(state);
+        await utils.welcomeMessage(state);
     } catch (error) {
         console.log(error);
     }
