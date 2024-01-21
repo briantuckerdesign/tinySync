@@ -20,7 +20,6 @@ import { getSchema } from "./get-schema.js";
 import { getSites } from "./get-sites.js";
 import { publishItem } from "./publish-item.js";
 import { publishItems } from "./publish-items.js";
-import { publishSite } from "./publish-site.js";
 import { createItem } from "./create-item.js";
 import { updateItem } from "./update-item.js";
 
@@ -35,7 +34,6 @@ export const webflow = {
     getSites,
     publishItem,
     publishItems,
-    publishSite,
     createItem,
     updateItem,
 };

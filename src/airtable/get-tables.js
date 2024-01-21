@@ -28,7 +28,12 @@ export async function getTables(airtableSettings, state) {
         // Docs: https://airtable.com/developers/web/api/get-base-schema
         const response = await axios.get(url, options);
 
-        return response.data.tables;
+        let tables = response.data.tables;
+        tables.forEach((table) => {
+            table.label = table.name;
+        });
+
+        return tables;
     } catch (error) {
         // TODO: Handle error
         throw error;

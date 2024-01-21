@@ -1,10 +1,8 @@
 /* -------------------------------------------------------------------------- */
 /*                             Sync / Sort records                            */
 /* -------------------------------------------------------------------------- */
-export async function sortRecords(selectedSync, airtableRecords, webflowItems, loader) {
+export async function sortRecords(selectedSync, airtableRecords, webflowItems) {
     try {
-        loader.text = "Sorting records...";
-        loader.color = "grey";
         const fields = selectedSync.fields;
 
         const itemIdFieldName = fields.find((field) => field.specialField === "itemId").airtableName;
@@ -26,8 +24,7 @@ export async function sortRecords(selectedSync, airtableRecords, webflowItems, l
             const idsMatch = webflowItemIds.has(webflowIdAirtableValue);
             let state = record.fields[stateFieldName];
 
-            const matchErorrMessage =
-                "Airtable record contained an Item ID that was not found in Webflow. To fix, clear the Item ID field in Airtable, or update the Item ID field in Airtable to match the ID of an existing item in Webflow.";
+            const matchErorrMessage = "Airtable record contained an Item ID that was not found in Webflow. To fix, clear the Item ID field in Airtable, or update the Item ID field in Airtable to match the ID of an existing item in Webflow.";
 
             switch (state) {
                 /*

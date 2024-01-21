@@ -6,7 +6,7 @@ import { utils } from "../utils/index.js";
 import { webflow } from "../webflow/index.js";
 
 // Delete items in Webflow that no longer exist in Airtable
-export async function deleteItems(records, syncConfig, loader = { text: "", color: "" }, state) {
+export async function deleteItems(records, syncConfig, state) {
     try {
         if (records.toDelete.length === 0) {
             return;
@@ -19,10 +19,9 @@ export async function deleteItems(records, syncConfig, loader = { text: "", colo
             let itemIdField = utils.findSpecial("itemId", syncConfig);
             let lastPublishedField = utils.findSpecial("lastPublished", syncConfig);
 
+            state.s.start("Deleting items...");
+
             for (let item of itemsToDelete) {
-                loader.text = "Deleting Webflow item...";
-                loader.color = "blue";
-                // THIS is webflow ID...
                 await webflow.deleteItem(item.webflowItemId, syncConfig);
 
                 let recordUpdates = {
@@ -34,11 +33,12 @@ export async function deleteItems(records, syncConfig, loader = { text: "", colo
 
                 await airtable.updateRecord(recordUpdates, item.airtableRecordId, syncConfig);
             }
+            state.s.stop(`✅ ${state.f.dim("Items deleted.")}`);
         }
     } catch (error) {
-        loader.warn("Error Webflow deleting items");
+        state.p.log.error("Error deleting Webflow items");
         if (error.response && error.response.status === 409) {
-            loader.warn("Item is referenced by another item. Skipping delete.");
+            state.p.log.error("Item is referenced by another item. Skipping delete.");
             return;
         }
         throw error;

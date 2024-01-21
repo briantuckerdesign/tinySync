@@ -12,7 +12,6 @@
  * 6. Save updated config
  *
  */
-import { ui } from "../../ui/index.js";
 import { v4 as uuidv4 } from "uuid";
 import { configTools } from "../../config-tools/index.js";
 import { flows } from "../index.js";
@@ -25,42 +24,35 @@ export async function createSync(state) {
         let config = state.config;
         let settings, syncSettings;
 
-        await ui.pretty.spacer();
-        await ui.pretty.logHeading("You will need a few things to get started:");
-        await ui.pretty.log("- A couple minutes of your time");
-        await ui.pretty.log("- An Airtable table with some ");
-        await ui.pretty.log("  matching fields in a Webflow collection");
-        await ui.pretty.log("- Airtable API token");
-        await ui.pretty.log("- Webflow API key");
-        await ui.pretty.log("- Airtable fields for:");
-        await ui.pretty.log("  - Name");
-        await ui.pretty.log("  - Slug");
-        await ui.pretty.log("  - State");
-        await ui.pretty.log("  - Webflow Item ID");
-        await ui.pretty.log("  - Last Published");
-        await ui.pretty.log("Read more about these required fields on Github.");
-        await ui.pretty.spacer();
+        state.p.log.info(state.f.bold("🔨 Create sync"));
+        state.p.note(`You will need a few things to get started:
 
-        const shallWeContinue = await ui.input.toggle({
-            name: "requirements",
-            disabled: "Uhhh nevermind.",
-            enabled: "Yes!",
-            message: "Got it?",
-        });
-        if (shallWeContinue === false) {
+    - Airtable API token
+    - Webflow API key
+
+    - Airtable fields (tinySync can create these for you)
+        - Name 
+        - Slug
+        - State
+        - Webflow item ID
+        - Last published
+
+Read more about these required fields on Github.`);
+
+        const shallWeContinue = await state.p.confirm({ message: "Got it?" });
+
+        if (shallWeContinue === false || state.p.isCancel(shallWeContinue)) {
             await flows.viewSyncs(state);
+            return;
         }
 
         let airtableSettings = await airtableSetup(state);
         let webflowSettings = await webflowSetup(state);
 
-        await ui.pretty.dashedLine();
-        await ui.pretty.spacer();
-        await ui.pretty.logHeading("Field Matching");
-        await ui.pretty.log("Hopefully it's not too confusing...");
-        await ui.pretty.spacer();
+        state.p.log.info(state.f.bold("Field matching"));
+        state.p.log.message("Hopefully it's not too confusing...");
 
-        let fields = await matchFields(airtableSettings, webflowSettings);
+        let fields = await matchFields(airtableSettings, webflowSettings, state);
 
         /**
          * Settings
@@ -77,30 +69,21 @@ export async function createSync(state) {
          *    What you see in Airtable is what you get in Webflow.
          */
 
-        await ui.pretty.dashedLine();
-        await ui.pretty.spacer();
-        await ui.pretty.logHeading("Settings");
-        await ui.pretty.log("Okay a couple final details...");
-        await ui.pretty.spacer();
+        state.p.log.info(state.f.bold("Settings"));
 
-        // Ask user for additional settings
-        settings = await ui.input.prompt([
+        settings = await state.p.group(
             {
-                type: "input",
-                name: "syncName",
-                message: "What would you like to name this sync?",
+                syncName: () => state.p.text({ message: "What would you like to name this sync?" }),
+                autoPublish: () => state.p.confirm({ message: "Automatically publish site if validation error occurs?" }),
+                deleteRecords: () => state.p.confirm({ message: "Delete records from Webflow if they are deleted in Airtable?" }),
             },
             {
-                type: "toggle",
-                name: "autoPublish",
-                message: "Automatically publish site if validation error occurs?",
-            },
-            {
-                type: "toggle",
-                name: "deleteRecords",
-                message: "Delete records from Webflow if they are deleted in Airtable?",
-            },
-        ]);
+                onCancel: async ({ results }) => {
+                    await flows.viewSyncs(state);
+                    return;
+                },
+            }
+        );
 
         /**
          * Sync object output
@@ -157,10 +140,10 @@ export async function createSync(state) {
         state.config = config;
         await configTools.save(state);
 
-        await ui.pretty.success();
-        await ui.pretty.logBold("Sync added successfully!");
+        state.p.log.success("✅ Sync added successfully!");
+        state.p.log.message("");
     } catch (error) {
-        console.log("Error creating sync.");
+        state.p.log.error("There was an error creating the sync.");
         throw error;
     }
 }

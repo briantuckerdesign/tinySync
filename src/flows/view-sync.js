@@ -21,75 +21,56 @@
  */
 
 import { sync } from "../sync/index.js";
-import { ui } from "../ui/index.js";
-import c from "ansi-colors";
 import { flows } from "./index.js";
-import { printTable } from "console-table-printer";
+import { AsciiTable3 } from "ascii-table3";
 
-export async function viewSync(state, syncConfig) {
+export async function viewSync(state, syncConfig, firstRun = false) {
     try {
-        {
-            await ui.pretty.spacer();
-            await ui.pretty.dashedLine();
-            await ui.pretty.spacer();
-            await ui.pretty.log("Sync details:");
-            await ui.pretty.spacer();
-            await ui.pretty.logBold(c.inverse(`     ${syncConfig.name}     `));
-            await ui.pretty.spacer();
+        if (firstRun) {
+            let note = `Sync:\n${state.f.bold(syncConfig.name)}\n`;
+
             if (syncConfig.webflow.site.customDomains.length > 0) {
                 for (const domain of syncConfig.webflow.site.customDomains) {
-                    await ui.pretty.log(`${c.dim(`${domain.url}`)}`);
+                    note += `\n${domain}`;
                 }
             } else {
-                await ui.pretty.log(`${c.dim("No custom domains. Publishing to Webflow subdomain.")}`);
+                note += `\nNo domains found, publishing to Webflow subdomain\n`;
             }
-            await ui.pretty.spacer();
-            //Create a table
-            const syncDetails = [
-                {
-                    _: "Site/Base",
-                    Airtable: syncConfig.airtable.base.name,
-                    Webflow: syncConfig.webflow.site.name,
-                },
-                {
-                    _: "Table/Collection",
-                    Airtable: syncConfig.airtable.table.name,
-                    Webflow: syncConfig.webflow.collection.name,
-                },
-            ];
-            printTable(syncDetails);
-            const settings = [
-                {
-                    Setting: "Publish on error",
-                    Value: syncConfig.autoPublish,
-                },
-                {
-                    Setting: "Airtable SSOT",
-                    Value: syncConfig.deleteRecords,
-                },
-            ];
-            printTable(settings);
 
-            await ui.pretty.spacer();
+            let syncDetails = new AsciiTable3().setHeading("", "Airtable", "Webflow").addRowMatrix([
+                ["Site/Base", syncConfig.airtable.base.name, syncConfig.webflow.site.name],
+                ["Table/Collection", syncConfig.airtable.table.name, syncConfig.webflow.collection.name],
+            ]);
+
+            note += `\n${syncDetails.toString()}`;
+
+            let settings = new AsciiTable3().setHeading("Setting", "Value").addRowMatrix([
+                ["Publish on error", syncConfig.autoPublish],
+                ["Airtable SSOT", syncConfig.deleteRecords],
+            ]);
+
+            note += `\n${settings.toString()}`;
+
+            state.p.note(note);
         }
 
+        state.p.log.info(`💎 ${state.f.bold(syncConfig.name)}`);
         const syncMessage = "What would you like to do?";
         const syncChoices = [
             {
-                message: `${c.green("»")} Sync`,
-                name: "runSync",
+                label: "Sync",
+                value: "runSync",
             },
-            { message: `${c.cyan("↑")} Publish site`, name: "publishSite" },
-            { message: `${c.red("✖")} Delete sync`, name: "deleteSync" },
-            { message: `${c.dim("←")} Back`, name: "back" },
-            { message: `${c.dim("✖")} Exit`, name: "exit" },
+            { label: "Publish site", value: "publishSite" },
+            { label: "Delete sync", value: "deleteSync" },
+            { label: "Back", value: "back" },
+            { label: "Exit", value: "exit" },
         ];
 
         // Asks user what they want to do with the selected sync
-        const userChoice = await ui.input.select({
-            name: "syncMenu",
+        const userChoice = await state.p.select({
             message: syncMessage,
-            choices: syncChoices,
+            options: syncChoices,
         });
 
         switch (userChoice) {
@@ -106,7 +87,7 @@ export async function viewSync(state, syncConfig) {
                 await flows.viewSyncs(state);
                 break;
             case "exit":
-                await ui.pretty.log("Exiting...");
+                state.p.outro("See ya later! 👋");
                 process.exit();
             default:
                 break;

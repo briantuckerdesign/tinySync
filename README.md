@@ -3,7 +3,6 @@
 **Airtable → Webflow sync via CLI**
 ***Alpha release: use at your own risk***
 
-
 - One-directional manual sync
 - Command-line interface
 - Free & open source
@@ -12,8 +11,7 @@
 - No record limits*
   - <sub>*We are all beholden to the limits of Airtable/Webflow/APIs 🧘</sub>
 
-
-## Quick start:
+## Quick start
 
 - Download the latest [release](https://github.com/briantuckerdesign/tinySync/releases)
 - Make sure you have NPM installed
@@ -97,18 +95,14 @@ Follow the prompts to set up your sync. If your sync utilizes linked records, yo
 
 I am a hobbyist developer. I have made best-effort attempts to make this software as secure and stable as possible, but I make no guarantees. Use at your own risk. For corporate users, I highly recommend amazing paid tools out there like [WhaleSync](https://whalesync.com/), [Flowmonk](https://flowmonk.com/), or [PowerImporter](https://https://www.powerimporter.com/).
 
-This is an early release. It works, but there may be errors. Please report any issues you find. I have a lot of ideas for features and improvements, but I'm a one-person team and I have a day job. If you'd like to contribute, please reach out!
+This is an early release, there may be errors. Please report any issues you find. I have a lot of ideas for features and improvements, but I'm a one-person team and I have a day job. If you'd like to contribute, please reach out!
 
 ---
 
-## Thank yous
+## Built with
 
-- [ansi-colors](https://github.com/doowb/ansi-colors)
+- [clack](https://github.com/natemoo-re/clack)
 - [axios](https://github.com/axios/axios)
-- [cli-spinners](https://github.com/sindresorhus/cli-spinners)
-- [console-table-printer](https://github.com/ayonious/console-table-printer)
-- [enquirer](https://github.com/enquirer/enquirer)
 - [figlet.js](https://github.com/patorjk/figlet.js)
-- [ora](https://github.com/sindresorhus/ora)
 - [showdown](https://github.com/showdownjs/showdown)
 - [uuid](https://github.com/uuidjs/uuid)

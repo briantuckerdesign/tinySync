@@ -16,73 +16,136 @@
  *
  */
 
-import { ui } from "../../ui/index.js";
 import { airtable } from "../../airtable/index.js";
-import c from "ansi-colors";
+import { flows } from "../index.js";
+import { utils } from "../../utils/index.js";
 
 export async function airtableSetup(state) {
     try {
-        let loader = state.loader;
-        await ui.pretty.dashedLine();
-        await ui.pretty.spacer();
-        await ui.pretty.logHeading("Airtable");
-        await ui.pretty.logBold("Let's get your Airtable information.");
-        await ui.pretty.spacer();
+        state.p.log.info(state.f.bold("Airtable"));
 
         // Ask user for API token and return bases
         let airtableSettings = await getApiTokenAndReturnBases(state);
 
-        // Ask user to select a base
-        airtableSettings.base = await ui.selectAndReturn(airtableSettings.bases, "Airtable base:", "base");
+        const basesToSelect = utils.encapsulateObjectForSelect(airtableSettings.bases);
 
+        // Ask user to select a base
+        airtableSettings.base = await state.p.select({
+            message: "Airtable base:",
+            options: basesToSelect,
+        });
+
+        if (state.p.isCancel(airtableSettings.base)) {
+            await flows.viewSyncs(state);
+        }
+
+        state.s.start("Getting tables...");
         // Return tables for selected base
         airtableSettings.tables = await airtable.getTables(airtableSettings, state);
+        state.s.stop(`✅ ${state.f.dim("Tables retrieved.")}`);
+
+        const tablesToSelect = utils.encapsulateObjectForSelect(airtableSettings.tables);
 
         // Ask user to select a table
-        airtableSettings.table = await ui.selectAndReturn(airtableSettings.tables, "Airtable table:", "table");
+        airtableSettings.table = await state.p.select({
+            message: "Airtable table:",
+            options: tablesToSelect,
+        });
+
+        if (state.p.isCancel(airtableSettings.table)) {
+            await flows.viewSyncs(state);
+        }
+
+        const viewsToSelect = utils.encapsulateObjectForSelect(airtableSettings.table.views);
+
         // Ask user to select a view
-        airtableSettings.view = await ui.selectAndReturn(airtableSettings.table.views, "Airtable view:", "view");
+        airtableSettings.view = await state.p.select({
+            message: "Airtable view:",
+            options: viewsToSelect,
+        });
+        if (state.p.isCancel(airtableSettings.view)) {
+            await flows.viewSyncs(state);
+        }
+
         {
             //airtableSettings.table.fields is an array of objects
             // add one to the beginning of the array with name of "Create for me"
             let createForMe = {
-                name: `${c.green("+")}" Create for me`,
+                name: `${state.f.italic("Create for me")}`,
                 tsCreateField: "createForMe",
             };
+
+            let fieldsToSelect = JSON.parse(JSON.stringify(airtableSettings.table.fields));
 
             // Adds [ Create for me ] to options
             // User can select an existing field
             // or tinySync can create one for them
-            airtableSettings.table.fields.unshift(createForMe);
+            fieldsToSelect.unshift(createForMe);
 
-            // State field:
-            airtableSettings.table.stateField = await ui.selectAndReturn(airtableSettings.table.fields, "State: Airtable field to store record state", "field");
-            // If user selects "Create for me" create the field
-            if (airtableSettings.table.stateField.tsCreateField) {
-                airtableSettings.table.stateField = await createStateField(airtableSettings, state);
+            fieldsToSelect = utils.encapsulateObjectForSelect(fieldsToSelect);
+            {
+                // State field:
+                airtableSettings.table.stateField = await state.p.select({
+                    message: "State: Airtable field to store item state.",
+                    options: fieldsToSelect,
+                });
+
+                if (state.p.isCancel(airtableSettings.table.stateField)) {
+                    await flows.viewSyncs(state);
+                }
+
+                // If user selects "Create for me" create the field
+                if (airtableSettings.table.stateField.tsCreateField) {
+                    airtableSettings.table.stateField = await createStateField(airtableSettings, state);
+                }
             }
+            {
+                // Last Published field:
+                airtableSettings.table.lastPublishedField = await state.p.select({
+                    message: "Last Published: Airtable field to store last published date/time.",
+                    options: fieldsToSelect,
+                });
 
-            // Last Published field:
-            airtableSettings.table.lastPublishedField = await ui.selectAndReturn(airtableSettings.table.fields, "Last Published: Airtable field to store the last published date/time.", "field");
-            // If user selects "Create for me" create the field
-            if (airtableSettings.table.lastPublishedField.tsCreateField) {
-                airtableSettings.table.lastPublishedField = await createLastPublishedField(airtableSettings, state);
+                if (state.p.isCancel(airtableSettings.table.lastPublishedField)) {
+                    await flows.viewSyncs(state);
+                }
+
+                // If user selects "Create for me" create the field
+                if (airtableSettings.table.lastPublishedField.tsCreateField) {
+                    airtableSettings.table.lastPublishedField = await createLastPublishedField(airtableSettings, state);
+                }
             }
+            {
+                // Slug field:
+                airtableSettings.table.slugField = await state.p.select({
+                    message: "Slug: Airtable field to store Webflow item slug.",
+                    options: fieldsToSelect,
+                });
 
-            // Slug field:
-            airtableSettings.table.slugField = await ui.selectAndReturn(airtableSettings.table.fields, "Slug: Airtable field to store Webflow item slug", "field");
+                if (state.p.isCancel(airtableSettings.table.slugField)) {
+                    await flows.viewSyncs(state);
+                }
 
-            // If user selects "Create for me" create the field
-            if (airtableSettings.table.slugField.tsCreateField) {
-                airtableSettings.table.slugField = await createSlugField(airtableSettings, state);
+                // If user selects "Create for me" create the field
+                if (airtableSettings.table.slugField.tsCreateField) {
+                    airtableSettings.table.slugField = await createSlugField(airtableSettings, state);
+                }
             }
+            {
+                // Webflow Item ID field:
+                airtableSettings.table.webflowItemIdField = await state.p.select({
+                    message: "Webflow Item ID: Airtable field to store Webflow item ID.",
+                    options: fieldsToSelect,
+                });
 
-            // Webflow Item ID field:
-            airtableSettings.table.webflowItemIdField = await ui.selectAndReturn(airtableSettings.table.fields, "Webflow Item ID: Airtable field to store Webflow item ID", "field");
+                if (state.p.isCancel(airtableSettings.table.webflowItemIdField)) {
+                    await flows.viewSyncs(state);
+                }
 
-            // If user selects "Create for me" create the field
-            if (airtableSettings.table.webflowItemIdField.tsCreateField) {
-                airtableSettings.table.webflowItemIdField = await createWebflowItemIdField(airtableSettings, state);
+                // If user selects "Create for me" create the field
+                if (airtableSettings.table.webflowItemIdField.tsCreateField) {
+                    airtableSettings.table.webflowItemIdField = await createWebflowItemIdField(airtableSettings, state);
+                }
             }
         }
         return airtableSettings;
@@ -107,23 +170,28 @@ async function getApiTokenAndReturnBases(state) {
     try {
         const airtableSettings = {};
 
-        // Ask user for API token
-        let apiToken = await ui.input.prompt({
-            name: "airtableApiToken",
-            type: "password",
+        let apiToken = await state.p.password({
             message: "Airtable API token:",
         });
+        if (state.p.isCancel(apiToken)) {
+            await flows.viewSyncs(state);
+            return;
+        }
 
+        state.s.start("Checking API token...");
         // Check if API token is valid by trying to get bases
-        let bases = await airtable.getBases(apiToken.airtableApiToken);
+        let bases = await airtable.getBases(apiToken);
+        state.s.stop(`✅ ${state.f.dim("Airtable token validated.")}`);
 
         // If API token is invalid, ask user to try again
         if (!bases) {
-            console.log("Something went wrong! \nEither your API token is invalid, or it doesn't have 'create' permissions on any bases. \n\nPlease try again.");
+            state.p.log.error("Something went wrong.");
+            state.p.log.message("Either your token is invalid, or it doesn't have 'create' permissions on any bases.");
+            state.p.log.message("Please try again.");
             return await getApiTokenAndReturnBases(state); // Recursively call the function again
         }
 
-        airtableSettings.apiToken = apiToken.airtableApiToken;
+        airtableSettings.apiToken = apiToken;
         airtableSettings.bases = bases;
 
         return airtableSettings;
@@ -162,7 +230,9 @@ async function createStateField(airtableSettings, state) {
             ],
         },
     };
+    state.s.start("Creating state field...");
     const response = await airtable.createField(field, syncConfig, state);
+    state.s.stop(`✅ ${state.f.dim("State field created.")}`);
     return response;
 }
 
@@ -185,7 +255,9 @@ async function createLastPublishedField(airtableSettings, state) {
             },
         },
     };
+    state.s.start("Creating last published field...");
     const response = await airtable.createField(field, syncConfig, state);
+    state.s.stop(`✅ ${state.f.dim("Last published field created.")}`);
 
     return response;
 }
@@ -200,7 +272,9 @@ async function createSlugField(airtableSettings, state) {
         type: "singleLineText",
         description: "Stores the Webflow item slug.",
     };
+    state.s.start("Creating slug field...");
     const response = await airtable.createField(field, syncConfig, state);
+    state.s.stop(`✅ ${state.f.dim("Slug field created.")}`);
     return response;
 }
 
@@ -214,6 +288,8 @@ async function createWebflowItemIdField(airtableSettings, state) {
         type: "singleLineText",
         description: "Stores the Webflow item ID.",
     };
+    state.s.start("Creating webflow item ID field...");
     const response = await airtable.createField(field, syncConfig, state);
+    state.s.stop(`✅ ${state.f.dim("Webflow item ID field created.")}`);
     return response;
 }
