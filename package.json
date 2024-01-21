@@ -20,7 +20,6 @@
     "console-table-printer": "^2.12.0",
     "enquirer": "^2.4.1",
     "figlet": "^1.7.0",
-    "ora": "^8.0.1",
     "picocolors": "^1.0.0",
     "showdown": "^2.1.0",
     "uuid": "^9.0.1"

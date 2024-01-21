@@ -54,7 +54,7 @@ export async function viewSync(state, syncConfig, firstRun = false) {
             state.p.note(note);
         }
 
-        state.p.log.info(`${state.f.bold(syncConfig.name)}`);
+        state.p.log.info(`💎 ${state.f.bold(syncConfig.name)}`);
         const syncMessage = "What would you like to do?";
         const syncChoices = [
             {

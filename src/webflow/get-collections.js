@@ -3,10 +3,7 @@
 /* -------------------------------------------------------------------------- */
 import axios from "axios";
 
-export async function getCollections(
-    webflowSettings,
-    loader = { text: "", color: "", start: () => {}, stop: () => {} }
-) {
+export async function getCollections(webflowSettings) {
     const siteId = webflowSettings.site.id;
     const apiKey = webflowSettings.apiKey;
     const url = `https://api.webflow.com/v2/sites/${siteId}/collections`;
@@ -27,7 +24,6 @@ export async function getCollections(
 
         return collections;
     } catch (error) {
-        console.log("Error getting collections.");
         throw error;
     }
 }

@@ -20,9 +20,10 @@ export async function checkIfSchemaIsCurrent(syncConfig, state) {
         state.s.stop(`✅ ${state.f.dim("Webflow schema retrieved.")}`);
 
         // Compare the new schema to the existing schema
+        state.s.start("Comparing schemas...");
         await checkIfSchemaIsCurrentHelper(syncConfig, "airtable");
         await checkIfSchemaIsCurrentHelper(syncConfig, "webflow");
-        state.p.log.message(`✅ ${state.f.dim("Schema is current.")}`);
+        state.s.stop(`✅ ${state.f.dim("Schemas are current.")}`);
 
         {
             const config = state.config;

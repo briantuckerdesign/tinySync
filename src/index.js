@@ -9,25 +9,24 @@
  */
 import { ui } from "./ui/index.js";
 import { flows } from "./flows/index.js";
-import ora from "ora";
 import * as p from "@clack/prompts";
 import f from "picocolors";
+import { utils } from "./utils/index.js";
 
 (async () => {
-    let loader = ora({ spinner: "arc", color: "gray" });
-
     let state = {
         config: null,
         password: null,
-        loader, // to be removed
-        p, // prompts/loader (via clack)
+        p, // prompts (via clack)
         f, // format (via picocolors)
-        s: p.spinner(),
+        s: p.spinner(), // spinner (via clack)
     };
-    await ui.pretty.heading("TinySync", "green");
-    await ui.pretty.spacer();
-    await ui.pretty.signature();
-    await ui.pretty.spacer();
+
+    try {
+        utils.welcomeMessage(state);
+    } catch (error) {
+        console.log(error);
+    }
 
     state.p.intro(state.f.dim(`tinySync v${process.env.npm_package_version}`)); // Fixed typo in variable name
 

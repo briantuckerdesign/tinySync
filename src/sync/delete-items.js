@@ -6,7 +6,7 @@ import { utils } from "../utils/index.js";
 import { webflow } from "../webflow/index.js";
 
 // Delete items in Webflow that no longer exist in Airtable
-export async function deleteItems(records, syncConfig, loader, state) {
+export async function deleteItems(records, syncConfig, state) {
     try {
         if (records.toDelete.length === 0) {
             return;

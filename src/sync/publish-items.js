@@ -43,6 +43,9 @@ export async function publishItems(records, syncConfig, state) {
             }
         }
 
+        state.s.stop(`✅ ${state.f.dim("Items published.")}`);
+
+        state.s.start("Updating records in Airtable...");
         // Update lastPublished field in Airtable
         for (let record of recordsToPublish) {
             let lastPublishedField = utils.findSpecial("lastPublished", syncConfig);
@@ -51,10 +54,9 @@ export async function publishItems(records, syncConfig, state) {
 
             recordUpdates = { fields: recordUpdates };
 
-            state.s.start("Updating records in Airtable...");
             await airtable.updateRecord(recordUpdates, record.id, syncConfig);
-            state.s.stop(`✅ ${state.f.dim("Records updated.")}`);
         }
+        state.s.stop(`✅ ${state.f.dim("Records updated.")}`);
 
         return response.data;
     } catch (error) {

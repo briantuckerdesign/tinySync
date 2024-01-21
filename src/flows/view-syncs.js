@@ -26,7 +26,7 @@ export async function viewSyncs(state) {
         // Formats syncs for select prompt
         const choices = syncs.map((sync) => {
             return {
-                label: state.f.italic(sync.name),
+                label: `💎 ${state.f.bold(sync.name)}`,
                 value: sync,
             };
         });
