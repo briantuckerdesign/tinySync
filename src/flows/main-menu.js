@@ -21,6 +21,7 @@ export const mainMenu = async (state) => {
             message: "What would you like to do?",
             options: [
                 { value: "viewSyncs", label: "View syncs" },
+                { value: "manageKeys", label: "Manage keys" },
                 { value: "changePassword", label: "Change password" },
                 { value: "exit", label: "Exit", hint: "Bye!" },
             ],
