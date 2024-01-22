@@ -14,6 +14,7 @@
 import { utils } from "../../utils/index.js";
 import { webflow } from "../../webflow/index.js";
 import { v4 as uuidv4 } from "uuid";
+import { flows } from "../index.js";
 
 export async function webflowSetup(state) {
     try {
@@ -63,15 +64,16 @@ export async function webflowSetup(state) {
         throw error;
     }
 }
-
+/* -------------------------------------------------------------------------- */
+/*                                 Get API Key                                */
+/* -------------------------------------------------------------------------- */
 async function getApiKeyAndReturnSites(state) {
     try {
-        // Get Airtable keys from config
-        const webflowKeys = state.config.keys.filter((key) => key.platform === "webflow");
-        console.log("🚀 ~ getApiKeyAndReturnSites ~ webflowKeys:", webflowKeys);
-
         let apiKey, createdThisSession, saveKey;
         const webflowSettings = {};
+
+        // Get Airtable keys from config
+        const webflowKeys = state.config.keys.filter((key) => key.platform === "webflow");
 
         // If there are keys, ask user to select one
         if (webflowKeys.length > 0) {

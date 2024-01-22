@@ -32,7 +32,6 @@ export async function getSites(syncConfig, state) {
 
         return sites;
     } catch (error) {
-        return null;
-        throw error;
+        // TODO: Handle error
     }
 }

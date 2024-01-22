@@ -155,28 +155,20 @@ export async function airtableSetup(state) {
     }
 }
 
-/**
- * Retrieves the API token from the user and returns the Airtable bases associated with the token.
- *
- * 1. Asks user for API Token
- * 2. Checks if token is valid by trying to get bases
- * 3. If not valid, asks user to try again
- * 4. If valid, returns the token and Airtable bases
- *
- *
- * @param {object} airtableSettings - The Airtable settings object.
- * @returns {Promise<object>} - A promise that resolves to the updated Airtable settings object.
- */
+/* -------------------------------------------------------------------------- */
+/*                                 Get API Key                                */
+/* -------------------------------------------------------------------------- */
 async function getApiTokenAndReturnBases(state) {
     try {
-        // Get Airtable keys from config
-        let airtableKeys = state.config.keys.filter((key) => key.platform === "airtable");
-
         let apiToken, createdThisSession, saveKey;
         const airtableSettings = {};
 
+        // Get Airtable keys from config
+        let airtableKeys = state.config.keys.filter((key) => key.platform === "airtable");
+
         // If there are keys, ask user to select one
         if (airtableKeys.length > 0) {
+            // Add "Create new key" option to beginning of array
             let newKey = { label: "Create new key", value: "createNewKey" };
             airtableKeys.unshift(newKey);
 
@@ -191,9 +183,10 @@ async function getApiTokenAndReturnBases(state) {
             }
         }
 
-        // If user selects "Create new key", ask for new key
+        // If user selects "Create new key", or no saved keys...
         if (apiToken === "createNewKey" || airtableKeys.length === 0) {
             createdThisSession = true;
+            // Ask for new API token
             apiToken = await state.p.password({
                 message: "Airtable API token:",
             });
@@ -253,7 +246,9 @@ async function getApiTokenAndReturnBases(state) {
         throw error;
     }
 }
-
+/* -------------------------------------------------------------------------- */
+/*                                   Helpers                                  */
+/* -------------------------------------------------------------------------- */
 async function createStateField(airtableSettings, state) {
     const syncConfig = {
         airtable: { ...airtableSettings },

@@ -21,7 +21,8 @@ export const loadConfig = async () => {
         // Read the file
         const filePath = "./src/data/config.json";
         const file = await fs.readFile(filePath, "utf8");
-        const config = JSON.parse(file);
+        let config = JSON.parse(file);
+        config = handleVersionChanges(config);
 
         return config;
     } catch (error) {
@@ -37,3 +38,7 @@ export const loadConfig = async () => {
         }
     }
 };
+function handleVersionChanges(config) {
+    // todo
+    return config;
+}
