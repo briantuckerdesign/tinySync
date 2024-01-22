@@ -12,5 +12,5 @@ export async function welcomeMessage(state) {
         )
     );
 
-    console.log(state.f.dim("\n        made with ❤️ by Brian\n"));
+    console.log(state.f.dim("\n        made with ❤️  by Brian\n"));
 }
