@@ -19,10 +19,10 @@ import { configTools } from "./index.js";
 export async function initConfig(state) {
     const defaultConfig = {
         syncs: [],
-        airtableKeys: [],
-        webflowKeys: [],
+        keys: [],
         settings: {},
         initVersion: process.env.npm_package_version,
+        version: "",
     };
 
     state.config = defaultConfig;

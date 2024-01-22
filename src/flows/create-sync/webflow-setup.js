@@ -13,6 +13,8 @@
  */
 import { utils } from "../../utils/index.js";
 import { webflow } from "../../webflow/index.js";
+import { v4 as uuidv4 } from "uuid";
+import { flows } from "../index.js";
 
 export async function webflowSetup(state) {
     try {
@@ -62,30 +64,85 @@ export async function webflowSetup(state) {
         throw error;
     }
 }
-
+/* -------------------------------------------------------------------------- */
+/*                                 Get API Key                                */
+/* -------------------------------------------------------------------------- */
 async function getApiKeyAndReturnSites(state) {
     try {
+        let apiKey, createdThisSession, saveKey;
         const webflowSettings = {};
 
-        // Ask user for API token
-        const apiKey = await state.p.password({
-            message: "Webflow API key:",
-        });
-        if (state.p.isCancel(apiKey)) {
-            await flows.viewSyncs(state);
-            return;
+        // Get Airtable keys from config
+        const webflowKeys = state.config.keys.filter((key) => key.platform === "webflow");
+
+        // If there are keys, ask user to select one
+        if (webflowKeys.length > 0) {
+            let newKey = { label: "Create new key", value: "createNewKey" };
+            webflowKeys.unshift(newKey);
+
+            apiKey = await state.p.select({
+                message: "Webflow API key:",
+                options: webflowKeys,
+            });
+            // Handle cancel
+            if (state.p.isCancel(apiKey)) {
+                await flows.viewSyncs(state);
+                return;
+            }
         }
-        state.s.start("Checking API key...");
+
+        // If user selects "Create new key", ask for new key
+        if (apiKey === "createNewKey" || webflowKeys.length === 0) {
+            createdThisSession = true;
+            // Ask user for API token
+            apiKey = await state.p.password({
+                message: "Webflow API key:",
+            });
+            // Handle cancel
+            if (state.p.isCancel(apiKey)) {
+                await flows.viewSyncs(state);
+                return;
+            }
+        }
+
         // Check if API token is valid by trying to get bases
+        state.s.start("Checking API key...");
         let sites = await webflow.getSites(apiKey, state);
-        state.s.stop(`✅ ${state.f.dim("Webflow key validated.")}`);
 
         // If API token is invalid, ask user to try again
         if (!sites) {
             state.p.log.error("Something went wrong.");
             state.p.log.message("Either your key is invalid, or it doesn't have proper permissions.");
             state.p.log.message("Please try again.");
-            return getApiKeyAndReturnSites(state); // Recursively call the function again
+            state.s.stop();
+            return await getApiKeyAndReturnSites(state); // Recursively call the function again
+        }
+        state.s.stop(`✅ ${state.f.dim("Webflow key validated.")}`);
+
+        if (createdThisSession) {
+            // Ask user if they want to save the API token
+            saveKey = await state.p.confirm({ message: "Save this API key to use in other syncs?" });
+            if (state.p.isCancel(saveKey)) {
+                await flows.viewSyncs(state);
+                return;
+            }
+        }
+
+        if (saveKey) {
+            // Ask user for label for API token
+            const keyLabel = await state.p.text({ message: "Key label" });
+            if (state.p.isCancel(keyLabel)) {
+                await flows.viewSyncs(state);
+                return;
+            }
+            const key = {
+                label: keyLabel,
+                value: apiKey,
+                platform: "webflow",
+                id: uuidv4(),
+            };
+            // Save API token to config
+            state.config.keys.push(key);
         }
 
         webflowSettings.apiKey = apiKey;

@@ -143,6 +143,7 @@ Read more about these required fields on Github.`);
         state.p.log.success("✅ Sync added successfully!");
         state.p.log.message("");
     } catch (error) {
+        console.log(error);
         state.p.log.error("There was an error creating the sync.");
         throw error;
     }

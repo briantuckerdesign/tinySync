@@ -30,6 +30,9 @@ export const mainMenu = async (state) => {
             case "viewSyncs":
                 await flows.viewSyncs(state);
                 break;
+            case "manageKeys":
+                await flows.manageKeys(state);
+                break;
             case "changePassword":
                 await flows.changePassword(state);
                 break;
